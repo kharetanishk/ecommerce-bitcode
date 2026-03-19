@@ -1,0 +1,11 @@
+{
+  "extends": "@ecommerce/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@ecommerce/types": ["../../packages/types/index.ts"],
+      "@ecommerce/validators": ["../../packages/validators/index.ts"],
+      "@ecommerce/ui": ["../../packages/ui/index.ts"]
+    }
+  }
+}

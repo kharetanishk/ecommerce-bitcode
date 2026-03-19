@@ -1,0 +1,14 @@
+{
+  "extends": "@ecommerce/typescript-config/base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@ecommerce/types": ["../../packages/types/index.ts"],
+      "@ecommerce/validators": ["../../packages/validators/index.ts"]
+    }
+  },
+  "include": ["src/**/*", "prisma/seed.ts"],
+  "exclude": ["node_modules", "dist"]
+}
