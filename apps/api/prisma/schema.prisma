@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum AttributeType {
+  TEXT
+  NUMBER
+  SELECT
+  MULTI_SELECT
+  BOOLEAN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  role      Role     @default(CUSTOMER)
+  provider  String   @default("email")
+  password  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders    Order[]
+  cartItems CartItem[]
+  reviews   Review[]
+}
+
+model Category {
+  id       String  @id @default(uuid())
+  name     String
+  slug     String  @unique
+  parentId String?
+
+  parent               Category?            @relation("CategoryTree", fields: [parentId], references: [id])
+  children             Category[]           @relation("CategoryTree")
+  products             Product[]
+  attributeDefinitions AttributeDefinition[]
+}
+
+model AttributeDefinition {
+  id         String        @id @default(uuid())
+  categoryId String
+  name       String
+  type       AttributeType
+  options    Json?
+  filterable Boolean       @default(false)
+  required   Boolean       @default(false)
+  sortOrder  Int           @default(0)
+
+  category          Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  productAttributes ProductAttribute[]
+
+  @@unique([categoryId, name])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  categoryId  String
+  basePrice   Decimal  @db.Decimal(10, 2)
+  isVisible   Boolean  @default(false)
+  stock       Int      @default(0)
+  images      Json     @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category   Category           @relation(fields: [categoryId], references: [id])
+  attributes ProductAttribute[]
+  orderItems OrderItem[]
+  reviews    Review[]
+  cartItems  CartItem[]
+
+  @@index([categoryId, isVisible])
+  @@index([slug])
+  @@index([createdAt])
+  @@index([basePrice])
+}
+
+model ProductAttribute {
+  id             String @id @default(uuid())
+  productId      String
+  attributeDefId String
+  value          String
+
+  product      Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attributeDef AttributeDefinition @relation(fields: [attributeDefId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, attributeDefId])
+  @@index([attributeDefId, value])
+}
+
+model CartItem {
+  id        String @id @default(uuid())
+  userId    String
+  productId String
+  quantity  Int
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  userId          String
+  status          OrderStatus @default(PENDING)
+  total           Decimal     @db.Decimal(10, 2)
+  shippingAddress Json
+  paymentId       String?
+  razorpayOrderId String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id])
+  items OrderItem[]
+
+  @@index([userId, createdAt])
+  @@index([status])
+}
+
+model OrderItem {
+  id            String  @id @default(uuid())
+  orderId       String
+  productId     String
+  quantity      Int
+  priceSnapshot Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  rating    Int
+  title     String?
+  body      String?
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId])
+}

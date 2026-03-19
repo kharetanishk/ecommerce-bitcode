@@ -1,26 +1,27 @@
 {
   "name": "@ecommerce/ui",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
   "exports": {
-    "./*": "./src/*.tsx"
+    ".": "./index.ts"
   },
   "scripts": {
-    "lint": "eslint . --max-warnings 0",
-    "generate:component": "turbo gen react-component",
+    "build": "tsc",
     "check-types": "tsc --noEmit"
   },
-  "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
-    "@types/node": "^22.15.3",
-    "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2",
-    "eslint": "^9.39.1",
-    "typescript": "5.9.2"
-  },
   "dependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.4.0"
+  },
+  "devDependencies": {
+    "@ecommerce/typescript-config": "workspace:*",
+    "@types/react": "^19",
+    "react": "^19.0.0",
+    "typescript": "^5.4.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
   }
 }

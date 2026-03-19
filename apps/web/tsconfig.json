@@ -2,10 +2,18 @@
   "extends": "@ecommerce/typescript-config/nextjs.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
-      "@ecommerce/types": ["../../packages/types/index.ts"],
-      "@ecommerce/validators": ["../../packages/validators/index.ts"],
-      "@ecommerce/ui": ["../../packages/ui/index.ts"]
-    }
-  }
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "noEmit": true,
+    "isolatedModules": true
+  },
+  "include": [
+    "../../packages/typescript-config/src",
+    "../../packages/typescript-config/next.config.ts",
+    "../../packages/typescript-config/next-env.d.ts",
+    "../../packages/typescript-config/.next/types/**/*.ts",
+    ".next/types/**/*.ts"
+  ]
 }
