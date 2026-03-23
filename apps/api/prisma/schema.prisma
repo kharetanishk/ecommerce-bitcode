@@ -30,6 +30,32 @@ enum OrderStatus {
   REFUNDED
 }
 
+enum Zone {
+  A  // Metro
+  B  // Tier-2
+  C  // Rest of India
+  X  // Not serviceable
+}
+
+enum PaymentMethod {
+  ONLINE
+  COD
+}
+
+enum CodStatus {
+  PENDING
+  COLLECTED
+  FAILED
+}
+
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  PICKED_UP
+  REFUNDED
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -137,7 +163,15 @@ model Order {
 
   user  User        @relation(fields: [userId], references: [id])
   items OrderItem[]
+  paymentMethod   PaymentMethod @default(ONLINE)
+  codStatus       CodStatus?                      // only for COD orders
+  shiprocketOrderId String?
+  awbCode         String?                         // courier tracking number
+  trackingUrl     String?                         // courier tracking page URL
+  courierName     String?                         // e.g. "Delhivery"
+  shippingCharge  Decimal       @default(0) @db.Decimal(10, 2)
 
+  returnRequests  ReturnRequest[]
   @@index([userId, createdAt])
   @@index([status])
 }
@@ -167,4 +201,32 @@ model Review {
 
   @@unique([userId, productId])
   @@index([productId])
+}
+
+model ReturnRequest {
+  id        String       @id @default(uuid())
+  orderId   String
+  userId    String
+  reason    String
+  comments  String?
+  status    ReturnStatus @default(REQUESTED)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@index([orderId])
+}
+
+model Pincode {
+  id            String  @id @default(uuid())
+  pincode       String  @unique
+  city          String
+  district      String
+  state         String
+  zone          Zone    @default(C)
+  isServiceable Boolean @default(true)
+
+  @@index([pincode])
 }

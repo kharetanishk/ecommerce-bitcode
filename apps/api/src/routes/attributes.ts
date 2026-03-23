@@ -1,0 +1,161 @@
+import { Router, Response } from "express";
+import { prisma } from "../lib/prisma";
+import { validateMiddleware } from "../middleware/validate.middleware";
+import {
+  authMiddleware,
+  requireAdmin,
+  AuthRequest,
+} from "../middleware/auth.middleware";
+import { attributeDefinitionSchema } from "@ecommerce/validators";
+
+const attributeRouter: Router = Router({ mergeParams: true }); // mergeParams to access :categoryId
+
+// ─── Public ───────────────────────────────────────────────────────────────────
+
+// GET /api/categories/:categoryId/attributes
+attributeRouter.get("/", async (req, res: Response): Promise<void> => {
+  try {
+    const attributes = await prisma.attributeDefinition.findMany({
+      where: { categoryId: req.params.categoryId },
+      orderBy: { sortOrder: "asc" },
+    });
+    res.json({ data: attributes });
+  } catch (err) {
+    console.error("[attributes:list]", err);
+    res.status(500).json({ error: "Failed to fetch attributes" });
+  }
+});
+
+// ─── Admin only ───────────────────────────────────────────────────────────────
+
+// POST /api/categories/:categoryId/attributes
+attributeRouter.post(
+  "/",
+  authMiddleware,
+  requireAdmin,
+  validateMiddleware(attributeDefinitionSchema),
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const { categoryId } = req.params;
+      const { name, type, options, filterable, required, sortOrder } = req.body;
+
+      // validateMiddleware: SELECT and MULTI_SELECT must have options
+      if (
+        (type === "SELECT" || type === "MULTI_SELECT") &&
+        (!options || options.length === 0)
+      ) {
+        res.status(400).json({
+          error: "SELECT and MULTI_SELECT types require at least one option",
+        });
+        return;
+      }
+
+      // validateMiddleware category exists
+      const category = await prisma.category.findUnique({
+        where: { id: categoryId },
+      });
+      if (!category) {
+        res.status(404).json({ error: "Category not found" });
+        return;
+      }
+
+      const attribute = await prisma.attributeDefinition.create({
+        data: {
+          categoryId,
+          name,
+          type,
+          options: options ?? null,
+          filterable,
+          required,
+          sortOrder,
+        },
+      });
+
+      res.status(201).json({ data: attribute });
+    } catch (err: any) {
+      // Prisma unique constraint: same name in same category
+      if (err.code === "P2002") {
+        res
+          .status(409)
+          .json({ error: "Attribute name already exists in this category" });
+        return;
+      }
+      console.error("[attributes:create]", err);
+      res.status(500).json({ error: "Failed to create attribute" });
+    }
+  },
+);
+
+// PATCH /api/categories/:categoryId/attributes/:id
+attributeRouter.patch(
+  "/:id",
+  authMiddleware,
+  requireAdmin,
+  validateMiddleware(attributeDefinitionSchema.partial()),
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const { id, categoryId } = req.params;
+      const { name, type, options, filterable, required, sortOrder } = req.body;
+
+      if (
+        type &&
+        (type === "SELECT" || type === "MULTI_SELECT") &&
+        (!options || options.length === 0)
+      ) {
+        res.status(400).json({
+          error: "SELECT and MULTI_SELECT types require at least one option",
+        });
+        return;
+      }
+
+      const attribute = await prisma.attributeDefinition.update({
+        where: { id },
+        data: {
+          ...(name !== undefined && { name }),
+          ...(type !== undefined && { type }),
+          ...(options !== undefined && { options }),
+          ...(filterable !== undefined && { filterable }),
+          ...(required !== undefined && { required }),
+          ...(sortOrder !== undefined && { sortOrder }),
+        },
+      });
+
+      res.json({ data: attribute });
+    } catch (err) {
+      console.error("[attributes:update]", err);
+      res.status(500).json({ error: "Failed to update attribute" });
+    }
+  },
+);
+
+// DELETE /api/categories/:categoryId/attributes/:id
+attributeRouter.delete(
+  "/:id",
+  authMiddleware,
+  requireAdmin,
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      // Check if any products use this attribute
+      const usageCount = await prisma.productAttribute.count({
+        where: { attributeDefId: id },
+      });
+
+      if (usageCount > 0) {
+        res.status(400).json({
+          error: `Cannot delete — ${usageCount} product(s) use this attribute`,
+        });
+        return;
+      }
+
+      await prisma.attributeDefinition.delete({ where: { id } });
+      res.json({ message: "Attribute deleted" });
+    } catch (err) {
+      console.error("[attributes:delete]", err);
+      res.status(500).json({ error: "Failed to delete attribute" });
+    }
+  },
+);
+
+export default attributeRouter;

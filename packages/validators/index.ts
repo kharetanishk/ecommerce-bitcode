@@ -94,6 +94,7 @@ export const shippingAddressSchema = z.object({
 
 export const orderSchema = z.object({
   shippingAddress: shippingAddressSchema,
+  paymentMethod: z.enum(["ONLINE", "COD"]).default("ONLINE"),
 });
 
 // ─── Review ───────────────────────────────────────────────────────────────────

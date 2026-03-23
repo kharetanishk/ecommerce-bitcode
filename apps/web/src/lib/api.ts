@@ -1,6 +1,7 @@
 import axios, { AxiosError, type AxiosRequestConfig } from "axios";
 import { getSession } from "next-auth/react";
 import type { ApiError } from "@ecommerce/types";
+import { toast } from "@/store/toast.store";
 
 // ─── Axios instance ───────────────────────────────────────────────────────────
 export const apiClient = axios.create({
@@ -29,6 +30,12 @@ apiClient.interceptors.response.use(
   (error: AxiosError<ApiError>) => {
     const message =
       error.response?.data?.error ?? error.message ?? "Something went wrong";
+
+    // Don't toast 401 — those are handled by redirecting to login
+    if (error.response?.status !== 401) {
+      toast.error(message);
+    }
+
     return Promise.reject(
       Object.assign(new Error(message), {
         status: error.response?.status,
