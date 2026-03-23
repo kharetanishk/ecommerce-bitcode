@@ -1,7 +1,8 @@
 import { Router, Request, Response } from "express";
 import { checkDelivery } from "../services/delivery.service";
 
-const router = Router();
+// Explicit type annotation avoids TS2742 portability errors in enterprise builds
+const router: ReturnType<typeof Router> = Router();
 
 // GET /api/delivery/check?pincode=492001&total=999
 router.get("/check", async (req: Request, res: Response): Promise<void> => {

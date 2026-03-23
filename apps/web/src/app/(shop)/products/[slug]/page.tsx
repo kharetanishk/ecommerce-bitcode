@@ -60,8 +60,10 @@ export default function ProductDetailPage({
     )
   }
 
-  const images    = product.images as any[]
-  const reviews   = product.reviews as any[]
+  const images = product.images as any[]
+  // `reviews` may be returned by the API but is not part of the shared `Product` type
+  // so we access it via `any` to keep build-time typing accurate without changing behavior.
+  const reviews = (product as any).reviews as any[]
   const avgRating = reviews.length
     ? Math.round(
         (reviews.reduce((s: number, r: any) => s + r.rating, 0) / reviews.length) * 10
@@ -210,7 +212,7 @@ export default function ProductDetailPage({
             </button>
 
             {/* Back link */}
-            
+            <a
               href="/products"
               className="block text-center text-sm text-gray-400 hover:text-gray-700 transition-colors"
             >

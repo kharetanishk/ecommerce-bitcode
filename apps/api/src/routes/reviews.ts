@@ -1,13 +1,15 @@
-import { Router, Response } from "express";
+import { Router, Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import { validate } from "../middleware/validate.middleware";
 import { authenticate, AuthRequest } from "../middleware/auth.middleware";
 import { reviewSchema } from "@ecommerce/validators";
 
-const router = Router({ mergeParams: true }); // access :productId from parent
+// Explicit type annotation avoids TS2742 portability errors in enterprise builds
+const router: ReturnType<typeof Router> = Router({ mergeParams: true }); // access :productId from parent
+
 
 // GET /api/products/:productId/reviews
-router.get("/", async (req, res: Response): Promise<void> => {
+router.get("/", async (req: Request<{ productId: string }>, res: Response): Promise<void> => {
   try {
     const reviews = await prisma.review.findMany({
       where: { productId: req.params.productId },

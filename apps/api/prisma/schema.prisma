@@ -70,6 +70,7 @@ model User {
   orders    Order[]
   cartItems CartItem[]
   reviews   Review[]
+  returnRequests  ReturnRequest[]
 }
 
 model Category {

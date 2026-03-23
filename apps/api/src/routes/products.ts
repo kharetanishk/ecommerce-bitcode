@@ -18,7 +18,8 @@ import {
 import { deleteFromR2 } from "../lib/r2";
 import { z } from "zod";
 
-const router = Router();
+// Explicit type annotation avoids TS2742 portability errors in enterprise builds
+const router: ReturnType<typeof Router> = Router();
 
 // ─── Public routes ────────────────────────────────────────────────────────────
 

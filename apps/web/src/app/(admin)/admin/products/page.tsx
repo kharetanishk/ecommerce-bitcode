@@ -19,6 +19,7 @@ export default function AdminProductsPage() {
     limit: 20,
     search: search || undefined,
   });
+
   const toggleVisibility = useToggleVisibility();
   const deleteProduct = useDeleteProduct();
 
@@ -65,9 +66,7 @@ export default function AdminProductsPage() {
       {/* Table */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400 text-sm">
-            Loading...
-          </div>
+          <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
         ) : products.length === 0 ? (
           <div className="p-8 text-center">
             <p className="text-gray-400 text-sm">No products found.</p>
@@ -106,6 +105,7 @@ export default function AdminProductsPage() {
                   const primaryImg =
                     p.images?.find((img: any) => img.isPrimary) ??
                     p.images?.[0];
+
                   return (
                     <tr
                       key={p.id}
@@ -122,18 +122,12 @@ export default function AdminProductsPage() {
                             />
                           ) : (
                             <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                              <span className="text-gray-300 text-xs">
-                                No img
-                              </span>
+                              <span className="text-gray-300 text-xs">No img</span>
                             </div>
                           )}
                           <div>
-                            <p className="font-medium text-gray-900">
-                              {p.name}
-                            </p>
-                            <p className="text-xs text-gray-400 font-mono">
-                              {p.slug}
-                            </p>
+                            <p className="font-medium text-gray-900">{p.name}</p>
+                            <p className="text-xs text-gray-400 font-mono">{p.slug}</p>
                           </div>
                         </div>
                       </td>
@@ -145,7 +139,13 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`text-sm font-medium ${p.stock === 0 ? "text-red-600" : p.stock < 10 ? "text-amber-600" : "text-gray-700"}`}
+                          className={`text-sm font-medium ${
+                            p.stock === 0
+                              ? "text-red-600"
+                              : p.stock < 10
+                                ? "text-amber-600"
+                                : "text-gray-700"
+                          }`}
                         >
                           {p.stock}
                         </span>
@@ -199,7 +199,9 @@ export default function AdminProductsPage() {
                     Previous
                   </button>
                   <button
-                    onClick={() => setPage((p) => Math.min(data.pages, p + 1))}
+                    onClick={() =>
+                      setPage((p) => Math.min(data.pages, p + 1))
+                    }
                     disabled={page === data.pages}
                     className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
                   >
@@ -214,3 +216,4 @@ export default function AdminProductsPage() {
     </div>
   );
 }
+

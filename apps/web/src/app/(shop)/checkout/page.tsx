@@ -98,7 +98,7 @@ export default function CheckoutPage() {
       // ── COD — no payment modal needed ──────────────────────────────────────
       if (paymentMethod === "COD") {
         clearCart();
-        router.push(`/orders/${data.data.order.id}?success=true`);
+        router.push(`/orders/${data.order.id}?success=true`);
         return;
       }
 

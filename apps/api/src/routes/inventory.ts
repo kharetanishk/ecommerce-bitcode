@@ -7,7 +7,7 @@ import {
 } from "../middleware/auth.middleware";
 import { z } from "zod";
 
-const router = Router();
+const router: Router = Router();
 
 // GET /api/inventory — all products with stock info
 router.get(

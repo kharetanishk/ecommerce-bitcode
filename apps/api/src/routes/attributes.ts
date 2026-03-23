@@ -1,8 +1,8 @@
-import { Router, Response } from "express";
+import { Router, Request, Response } from "express";
 import { prisma } from "../lib/prisma";
-import { validateMiddleware } from "../middleware/validate.middleware";
+import { validate } from "../middleware/validate.middleware";
 import {
-  authMiddleware,
+  authenticate,
   requireAdmin,
   AuthRequest,
 } from "../middleware/auth.middleware";
@@ -13,7 +13,9 @@ const attributeRouter: Router = Router({ mergeParams: true }); // mergeParams to
 // ─── Public ───────────────────────────────────────────────────────────────────
 
 // GET /api/categories/:categoryId/attributes
-attributeRouter.get("/", async (req, res: Response): Promise<void> => {
+attributeRouter.get(
+  "/",
+  async (req: Request<{ categoryId: string }>, res: Response): Promise<void> => {
   try {
     const attributes = await prisma.attributeDefinition.findMany({
       where: { categoryId: req.params.categoryId },
@@ -24,16 +26,17 @@ attributeRouter.get("/", async (req, res: Response): Promise<void> => {
     console.error("[attributes:list]", err);
     res.status(500).json({ error: "Failed to fetch attributes" });
   }
-});
+  },
+);
 
 // ─── Admin only ───────────────────────────────────────────────────────────────
 
 // POST /api/categories/:categoryId/attributes
 attributeRouter.post(
   "/",
-  authMiddleware,
+  authenticate,
   requireAdmin,
-  validateMiddleware(attributeDefinitionSchema),
+  validate(attributeDefinitionSchema),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { categoryId } = req.params;
@@ -89,12 +92,12 @@ attributeRouter.post(
 // PATCH /api/categories/:categoryId/attributes/:id
 attributeRouter.patch(
   "/:id",
-  authMiddleware,
+  authenticate,
   requireAdmin,
-  validateMiddleware(attributeDefinitionSchema.partial()),
+  validate(attributeDefinitionSchema.partial()),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { id, categoryId } = req.params;
+      const { id } = req.params;
       const { name, type, options, filterable, required, sortOrder } = req.body;
 
       if (
@@ -131,7 +134,7 @@ attributeRouter.patch(
 // DELETE /api/categories/:categoryId/attributes/:id
 attributeRouter.delete(
   "/:id",
-  authMiddleware,
+  authenticate,
   requireAdmin,
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {

@@ -7,7 +7,8 @@ import {
 } from "../middleware/auth.middleware";
 import { z } from "zod";
 
-const router = Router();
+// Explicit type annotation avoids TS2742 portability errors in enterprise builds
+const router: ReturnType<typeof Router> = Router();
 
 const returnSchema = z.object({
   orderId: z.string().uuid(),

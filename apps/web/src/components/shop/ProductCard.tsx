@@ -10,7 +10,9 @@ export function ProductCard({ product }: Props) {
   const primaryImg =
     product.images?.find((img: any) => img.isPrimary) ?? product.images?.[0];
 
-  const reviews = product.reviews ?? [];
+  // `reviews` may be present in API responses but is not part of the shared
+  // `Product` type, so we access it via `any` to keep build-time typing accurate.
+  const reviews = (product as any).reviews ?? [];
   const avgRating = reviews.length
     ? Math.round(
         (reviews.reduce((s: number, r: any) => s + r.rating, 0) /

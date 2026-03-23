@@ -1,4 +1,4 @@
-import { Router, Response } from "express";
+import { Router, Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import { validate } from "../middleware/validate.middleware";
 import {
@@ -19,7 +19,7 @@ import { orderSchema } from "@ecommerce/validators";
 import { razorpay, verifyPaymentSignature } from "../lib/razorpay";
 import { z } from "zod";
 
-const router = Router();
+const router: Router = Router();
 
 const orderInclude = {
   items: {
@@ -466,7 +466,10 @@ router.patch(
 
 router.post(
   "/webhook/shiprocket",
-  async (req: Request, res: Response): Promise<void> => {
+  async (
+    req: Request<{}, any, { awb?: string; current_status?: string; order_id?: string }>,
+    res: Response,
+  ): Promise<void> => {
     try {
       const { awb, current_status, order_id } = req.body;
 
@@ -483,7 +486,7 @@ router.post(
 
       // Find order by AWB code
       const order = await prisma.order.findFirst({
-        where: { awbCode: awb },
+        where: { awbCode: awb ?? undefined },
         include: { user: true },
       });
 

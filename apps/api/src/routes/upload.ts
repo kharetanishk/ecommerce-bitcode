@@ -7,7 +7,8 @@ import {
 import { generateUploadUrl } from "../lib/r2";
 import { z } from "zod";
 
-const router = Router();
+// Explicit type annotation avoids TS2742 portability errors in enterprise builds
+const router: ReturnType<typeof Router> = Router();
 
 const uploadSchema = z.object({
   contentType: z.string(),

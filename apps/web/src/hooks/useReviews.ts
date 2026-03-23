@@ -24,7 +24,7 @@ export function useReviews(productId: string) {
         }>(`/api/products/${productId}/reviews`)
         .then((r) => {
           toast.success("Reviews fetched successfully");
-          return r.data;
+          return r; // keep { data, meta } for consumers
         }),
     enabled: !!productId,
     staleTime: 60_000,
