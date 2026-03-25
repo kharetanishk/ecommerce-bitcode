@@ -1,20 +1,29 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth.store";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  const router = useRouter();
+  const user = useAuthStore((s) => s.user);
 
-  // Double-check on server — middleware catches most cases
-  // but this is the safety net
-  if (!session || session.user.role !== "ADMIN") {
-    redirect("/login");
-  }
+  useEffect(() => {
+    if (user === null) {
+      router.push("/login?callbackUrl=/admin");
+      return;
+    }
+    if (user.role !== "ADMIN") {
+      router.push("/");
+    }
+  }, [user, router]);
+
+  if (user === null || user.role !== "ADMIN") return null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   {
@@ -104,6 +104,7 @@ const navItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col">
@@ -114,7 +115,7 @@ export function AdminSidebar() {
             <span className="text-white text-xs font-bold">B</span>
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">BitCode</p>
+            <p className="text-sm font-semibold text-gray-900">SaleMitra</p>
             <p className="text-xs text-gray-400">Admin Panel</p>
           </div>
         </Link>
@@ -167,7 +168,8 @@ export function AdminSidebar() {
           View Store
         </Link>
         <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
+          type="button"
+          onClick={() => logout()}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors mt-1"
         >
           <svg
@@ -183,7 +185,7 @@ export function AdminSidebar() {
               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
             />
           </svg>
-          Sign out
+          Log out
         </button>
       </div>
     </aside>

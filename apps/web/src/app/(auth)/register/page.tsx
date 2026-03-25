@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/store/toast.store";
 
 function RegisterForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+  const { register } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -31,31 +30,25 @@ function RegisterForm() {
     setLoading(true);
 
     try {
-      await api.post("/api/auth/register", { name, email, password });
-
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      setLoading(false);
-
-      if (result?.error) {
-        setError("Account created but sign-in failed. Please try signing in.");
-        return;
-      }
-
-      router.push(callbackUrl);
+      await register(name, email, password);
+      router.push("/");
       router.refresh();
-    } catch (err) {
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to create account",
+      );
+    } finally {
       setLoading(false);
-      setError(err instanceof Error ? err.message : "Failed to create account");
     }
   }
 
-  async function handleGoogle() {
-    await signIn("google", { callbackUrl });
+  function handleGoogle() {
+    const base = process.env.NEXT_PUBLIC_API_URL;
+    if (base) {
+      window.location.href = `${base}/api/auth/google`;
+      return;
+    }
+    toast.info("Google sign-in coming soon");
   }
 
   return (
@@ -65,12 +58,11 @@ function RegisterForm() {
         <p className="text-sm text-gray-500 mt-1">Sign up to get started</p>
       </div>
 
-      {/* Google Sign In */}
       <button
+        type="button"
         onClick={handleGoogle}
         className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
       >
-        {/* Google SVG icon */}
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path
             fill="#4285F4"
@@ -101,7 +93,6 @@ function RegisterForm() {
         </div>
       </div>
 
-      {/* Register form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         {(error || passwordMismatch) && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">

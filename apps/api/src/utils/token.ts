@@ -3,7 +3,7 @@ import { Response } from "express";
 
 export function signtoken(userId: string): string {
   return jwt.sign({ userId }, process.env.JWT_SECRET!, {
-    expiresIN: process.env.JWT_EXPIRES_IN || "10d",
+    expiresIn: process.env.JWT_EXPIRES_IN || "10d",
   } as jwt.SignOptions);
 }
 

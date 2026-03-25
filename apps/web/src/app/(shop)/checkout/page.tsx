@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart.store";
+import { useAuthStore } from "@/store/auth.store";
 import { useRazorpay } from "@/hooks/useRazorpay";
 import { api } from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
@@ -45,8 +45,19 @@ const INDIAN_STATES = [
   "Puducherry",
 ];
 
+type CodOrderResponse = { data: { id: string } };
+
+type OnlineOrderResponse = {
+  data: {
+    order: { id: string };
+    razorpayOrderId: string;
+    amount: number;
+    currency: string;
+  };
+};
+
 export default function CheckoutPage() {
-  const { data: session } = useSession();
+  const user = useAuthStore((s) => s.user);
   const router = useRouter();
   const items = useCartStore((s) => s.items);
   const getTotal = useCartStore((s) => s.getTotal);
@@ -60,7 +71,7 @@ export default function CheckoutPage() {
   const [deliveryInfo, setDeliveryInfo] = useState<any>(null);
   const [shippingCharge, setShippingCharge] = useState(0);
   const [address, setAddress] = useState<ShippingAddress>({
-    name: session?.user?.name ?? "",
+    name: "",
     phone: "",
     line1: "",
     line2: "",
@@ -70,6 +81,14 @@ export default function CheckoutPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (user?.name) {
+      setAddress((prev) =>
+        prev.name ? prev : { ...prev, name: user.name ?? "" },
+      );
+    }
+  }, [user?.name]);
 
   function updateAddress(field: keyof ShippingAddress, value: string) {
     setAddress((prev) => ({ ...prev, [field]: value }));
@@ -83,47 +102,44 @@ export default function CheckoutPage() {
     setLoading(true);
 
     try {
-      const { data } = await api.post<{
-        data: {
-          order: { id: string };
-          razorpayOrderId: string;
-          amount: number;
-          currency: string;
-        };
-      }>("/api/orders", {
+      if (paymentMethod === "COD") {
+        const res = await api.post<CodOrderResponse>("/api/orders", {
+          shippingAddress: address,
+          paymentMethod,
+        });
+        clearCart();
+        router.push(`/orders/${res.data.id}?success=true`);
+        return;
+      }
+
+      const res = await api.post<OnlineOrderResponse>("/api/orders", {
         shippingAddress: address,
         paymentMethod,
       });
 
-      // ── COD — no payment modal needed ──────────────────────────────────────
-      if (paymentMethod === "COD") {
-        clearCart();
-        router.push(`/orders/${data.order.id}?success=true`);
-        return;
-      }
+      const { order, razorpayOrderId, amount, currency } = res.data;
 
-      // ── Online payment — open Razorpay modal ───────────────────────────────
       setLoading(false);
 
       openRazorpay({
-        orderId: data.razorpayOrderId,
-        amount: data.amount,
-        currency: data.currency,
+        orderId: razorpayOrderId,
+        amount,
+        currency,
         name: "BitCode Store",
-        description: `Order #${data.order.id.slice(0, 8)}`,
-        userEmail: session?.user?.email ?? "",
-        userName: session?.user?.name ?? "",
+        description: `Order #${order.id.slice(0, 8)}`,
+        userEmail: user?.email ?? "",
+        userName: user?.name ?? "",
 
         onSuccess: async (response) => {
           setLoading(true);
           try {
-            await api.post(`/api/orders/${data.order.id}/verify-payment`, {
+            await api.post(`/api/orders/${order.id}/verify-payment`, {
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
             });
             clearCart();
-            router.push(`/orders/${data.order.id}?success=true`);
+            router.push(`/orders/${order.id}?success=true`);
           } catch {
             setError(
               "Payment verified but order confirmation failed. Contact support.",
@@ -136,8 +152,8 @@ export default function CheckoutPage() {
           setError("Payment was cancelled. Your order is saved — try again.");
         },
       });
-    } catch (err: any) {
-      setError(err.message ?? "Failed to create order");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to create order");
       setLoading(false);
     }
   }

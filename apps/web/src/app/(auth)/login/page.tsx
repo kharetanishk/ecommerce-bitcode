@@ -1,43 +1,50 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/store/toast.store";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleCredentials(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
-    setLoading(false);
-
-    if (result?.error) {
-      setError("Invalid email or password");
-      return;
+    try {
+      const user = await login(email, password);
+      if (user.role === "ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push(callbackUrl);
+      }
+      router.refresh();
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Invalid email or password",
+      );
+    } finally {
+      setLoading(false);
     }
-
-    router.push(callbackUrl);
-    router.refresh();
   }
 
-  async function handleGoogle() {
-    await signIn("google", { callbackUrl });
+  function handleGoogle() {
+    const base = process.env.NEXT_PUBLIC_API_URL;
+    if (base) {
+      window.location.href = `${base}/api/auth/google`;
+      return;
+    }
+    toast.info("Google sign-in coming soon");
   }
 
   return (
@@ -47,12 +54,11 @@ function LoginForm() {
         <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
       </div>
 
-      {/* Google Sign In */}
       <button
+        type="button"
         onClick={handleGoogle}
         className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
       >
-        {/* Google SVG icon */}
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path
             fill="#4285F4"
@@ -83,8 +89,7 @@ function LoginForm() {
         </div>
       </div>
 
-      {/* Credentials form */}
-      <form onSubmit={handleCredentials} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
             {error}
@@ -98,21 +103,19 @@ function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-black"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black text-black"
             placeholder="you@example.com"
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-sm font-medium text-gray-700">
-            Password
-          </label>
+          <label className="text-sm font-medium text-gray-700">Password</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-black"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black text-black"
             placeholder="••••••••"
           />
         </div>
@@ -120,7 +123,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-black text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-black text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
         >
           {loading ? "Signing in..." : "Sign in"}
         </button>
@@ -128,10 +131,7 @@ function LoginForm() {
 
       <p className="text-center text-sm text-gray-500">
         Don&apos;t have an account?{" "}
-        <a
-          href="/register"
-          className="text-black font-medium hover:underline"
-        >
+        <a href="/register" className="text-black font-medium hover:underline">
           Create one
         </a>
       </p>

@@ -64,11 +64,25 @@ export function useRazorpay() {
         ondismiss: options.onDismiss,
       },
       handler: (response: any) => {
-        options.onSuccess({
+        const payload = {
           razorpay_order_id: response.razorpay_order_id,
           razorpay_payment_id: response.razorpay_payment_id,
           razorpay_signature: response.razorpay_signature,
-        });
+        };
+        try {
+          const result = options.onSuccess(payload) as unknown;
+          if (
+            result !== null &&
+            result !== undefined &&
+            typeof (result as Promise<unknown>).then === "function"
+          ) {
+            void (result as Promise<unknown>).catch((err) => {
+              console.error("[Razorpay] onSuccess failed:", err);
+            });
+          }
+        } catch (err) {
+          console.error("[Razorpay] onSuccess failed:", err);
+        }
       },
     });
 

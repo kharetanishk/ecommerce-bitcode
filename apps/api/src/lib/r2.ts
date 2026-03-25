@@ -16,7 +16,7 @@ export const r2 = new S3Client({
 });
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+// const MAX_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
 
 export async function generateUploadUrl(
   contentType: string,
@@ -33,7 +33,7 @@ export async function generateUploadUrl(
     Bucket: process.env.R2_BUCKET_NAME!,
     Key: key,
     ContentType: contentType,
-    ContentLength: MAX_SIZE_BYTES, // max allowed upload size
+    // ContentLength: MAX_SIZE_BYTES, // max allowed upload size
   });
 
   // URL expires in 5 minutes — enough time for frontend upload

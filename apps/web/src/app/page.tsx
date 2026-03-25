@@ -9,7 +9,7 @@ export default function Home(): JSX.Element {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
           <div className="flex items-center gap-8">
             <Link href="/" className="text-xl font-bold tracking-tight">
-              BitCode
+              SaleMitra
             </Link>
             <div className="hidden gap-6 text-sm font-medium text-zinc-600 md:flex">
               <Link href="#" className="hover:text-zinc-950 transition-colors">
@@ -55,7 +55,8 @@ export default function Home(): JSX.Element {
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-600 sm:text-xl">
               Discover curated, premium products built for the modern lifestyle.
-              Experience seamless checkout and dynamic catalogs designed for you.
+              Experience seamless checkout and dynamic catalogs designed for
+              you.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -82,7 +83,8 @@ export default function Home(): JSX.Element {
                 Everything you need
               </h2>
               <p className="mt-4 text-lg leading-8 text-zinc-600">
-                A platform designed from the ground up for speed, security, and simplicity.
+                A platform designed from the ground up for speed, security, and
+                simplicity.
               </p>
             </div>
             <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
@@ -91,14 +93,28 @@ export default function Home(): JSX.Element {
                 <div className="flex flex-col">
                   <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-zinc-950">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6 text-zinc-900">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="h-6 w-6 text-zinc-900"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"
+                        />
                       </svg>
                     </div>
                     Dynamic Catalog
                   </dt>
                   <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-zinc-600">
-                    <p className="flex-auto">Real-time inventory updates and intelligent search to help you find exactly what you're looking for, instantly.</p>
+                    <p className="flex-auto">
+                      Real-time inventory updates and intelligent search to help
+                      you find exactly what you're looking for, instantly.
+                    </p>
                   </dd>
                 </div>
 
@@ -106,14 +122,28 @@ export default function Home(): JSX.Element {
                 <div className="flex flex-col">
                   <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-zinc-950">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6 text-zinc-900">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="h-6 w-6 text-zinc-900"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+                        />
                       </svg>
                     </div>
                     Secure Checkout
                   </dt>
                   <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-zinc-600">
-                    <p className="flex-auto">Enterprise-grade encryption and seamless payment integrations ensure your data is always protected.</p>
+                    <p className="flex-auto">
+                      Enterprise-grade encryption and seamless payment
+                      integrations ensure your data is always protected.
+                    </p>
                   </dd>
                 </div>
 
@@ -121,14 +151,28 @@ export default function Home(): JSX.Element {
                 <div className="flex flex-col">
                   <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-zinc-950">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6 text-zinc-900">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="h-6 w-6 text-zinc-900"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"
+                        />
                       </svg>
                     </div>
                     Fast Delivery
                   </dt>
                   <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-zinc-600">
-                    <p className="flex-auto">Optimized logistics networks ensuring your premium products arrive at your doorstep faster than ever.</p>
+                    <p className="flex-auto">
+                      Optimized logistics networks ensuring your premium
+                      products arrive at your doorstep faster than ever.
+                    </p>
                   </dd>
                 </div>
               </dl>
@@ -161,13 +205,20 @@ export default function Home(): JSX.Element {
       <footer className="border-t border-zinc-100 bg-white">
         <div className="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
           <div className="flex justify-center md:order-2 space-x-6 text-sm font-medium text-zinc-500">
-            <Link href="#" className="hover:text-zinc-950 transition-colors">Privacy</Link>
-            <Link href="#" className="hover:text-zinc-950 transition-colors">Terms</Link>
-            <Link href="#" className="hover:text-zinc-950 transition-colors">Contact</Link>
+            <Link href="#" className="hover:text-zinc-950 transition-colors">
+              Privacy
+            </Link>
+            <Link href="#" className="hover:text-zinc-950 transition-colors">
+              Terms
+            </Link>
+            <Link href="#" className="hover:text-zinc-950 transition-colors">
+              Contact
+            </Link>
           </div>
           <div className="mt-8 md:order-1 md:mt-0">
             <p className="text-center text-sm leading-5 text-zinc-500">
-              &copy; {new Date().getFullYear()} BitCode, Inc. All rights reserved.
+              &copy; {new Date().getFullYear()} BitCode, Inc. All rights
+              reserved.
             </p>
           </div>
         </div>

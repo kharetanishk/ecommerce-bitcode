@@ -1,18 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
-import { useCartStore } from "@/store/cart.store";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useCartStore } from "@/store/cart.store";
 import { useLocationDetect } from "@/hooks/useLocationDetect";
 import { useLocationStore } from "@/store/location.store";
 
 export function Navbar() {
-  const { data: session } = useSession();
+  const { user, isAdmin, logout } = useAuth();
   const openCart = useCartStore((s) => s.openCart);
   const getCount = useCartStore((s) => s.getCount);
   const count = getCount();
   const [menuOpen, setMenuOpen] = useState(false);
+
   useLocationDetect();
   const { city, detectedBy } = useLocationStore();
 
@@ -27,7 +29,7 @@ export function Navbar() {
           <span className="font-semibold text-gray-900">BitCode</span>
         </Link>
 
-        {/* Nav links — desktop */}
+        {/* Nav links */}
         <div className="hidden md:flex items-center gap-6">
           <Link
             href="/products"
@@ -35,7 +37,7 @@ export function Navbar() {
           >
             Products
           </Link>
-          {session?.user && (
+          {user && (
             <Link
               href="/orders"
               className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
@@ -43,7 +45,7 @@ export function Navbar() {
               My Orders
             </Link>
           )}
-          {(session?.user as any)?.role === "ADMIN" && (
+          {isAdmin && (
             <Link
               href="/admin"
               className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
@@ -51,40 +53,36 @@ export function Navbar() {
               Admin
             </Link>
           )}
+          {/* Location indicator */}
+          {city && (
+            <div className="hidden md:flex items-center gap-1.5 text-xs text-gray-400 border border-gray-200 rounded-full px-3 py-1">
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              {city}
+            </div>
+          )}
         </div>
 
-        {city && (
-          <div className="hidden md:flex items-center gap-1.5 text-xs text-gray-400 border border-gray-200 rounded-full px-3 py-1">
-            <svg
-              className="w-3 h-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            {city}
-            {detectedBy === "ip" && <span className="text-gray-300">·</span>}
-            {detectedBy === "ip" && (
-              <span className="text-gray-300 text-xs">Change</span>
-            )}
-          </div>
-        )}
-
-        {/* Right side actions */}
+        {/* Right actions */}
         <div className="flex items-center gap-2">
-          {/* Cart button */}
+          {/* Cart */}
           <button
             onClick={openCart}
             className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
@@ -110,30 +108,28 @@ export function Navbar() {
           </button>
 
           {/* Auth */}
-          {session ? (
+          {user ? (
             <div className="relative">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                  {session.user?.image ? (
+                  {user.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={session.user.image}
+                      src={user.image}
                       alt=""
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <span className="text-xs font-medium text-gray-600">
-                      {(session.user?.name ??
-                        session.user?.email ??
-                        "U")[0].toUpperCase()}
+                      {(user.name ?? user.email)[0].toUpperCase()}
                     </span>
                   )}
                 </div>
                 <span className="text-sm text-gray-700 hidden sm:block max-w-[100px] truncate">
-                  {session.user?.name ?? session.user?.email}
+                  {user.name ?? user.email}
                 </span>
                 <svg
                   className="w-4 h-4 text-gray-400"
@@ -164,7 +160,7 @@ export function Navbar() {
                     >
                       My Orders
                     </Link>
-                    {(session?.user as any)?.role === "ADMIN" && (
+                    {isAdmin && (
                       <Link
                         href="/admin"
                         onClick={() => setMenuOpen(false)}
@@ -177,7 +173,7 @@ export function Navbar() {
                       <button
                         onClick={() => {
                           setMenuOpen(false);
-                          signOut({ callbackUrl: "/" });
+                          logout();
                         }}
                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >

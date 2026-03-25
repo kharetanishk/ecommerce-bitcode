@@ -1,14 +1,15 @@
 "use client";
 
-import { SessionProvider } from "next-auth/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCartSync } from "@/hooks/useCart";
 import { CartDrawer } from "@/components/shop/CartDrawer";
 import { Toaster } from "@/components/ui/Toaster";
-// Inner component has access to session + query context
+import { getMeApi } from "@/lib/authApi";
+import { useAuthStore } from "@/store/auth.store";
+
 function AppShell({ children }: { children: React.ReactNode }) {
-  useCartSync(); // syncs local cart with server on login
+  useCartSync();
   return (
     <>
       {children}
@@ -32,11 +33,37 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }),
   );
 
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const clearAuth = useAuthStore((s) => s.clearAuth);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const { user } = await getMeApi();
+        if (cancelled) return;
+        setAuth(user, null);
+      } catch {
+        if (cancelled) return;
+        clearAuth();
+      } finally {
+        if (cancelled) return;
+        setAuthChecked(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [setAuth, clearAuth]);
+
+  if (!authChecked) return null;
+
   return (
-    <SessionProvider>
-      <QueryClientProvider client={queryClient}>
-        <AppShell>{children}</AppShell>
-      </QueryClientProvider>
-    </SessionProvider>
+    <QueryClientProvider client={queryClient}>
+      <AppShell>{children}</AppShell>
+    </QueryClientProvider>
   );
 }

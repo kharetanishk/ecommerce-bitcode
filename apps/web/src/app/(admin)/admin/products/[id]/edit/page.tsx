@@ -1,8 +1,8 @@
 "use client";
 
+import { use } from "react";
 import { useAdminProduct } from "@/hooks/useProducts";
 import { ProductForm } from "@/components/admin/ProductForm";
-import { use } from "react";
 
 export default function EditProductPage({
   params,
@@ -30,3 +30,4 @@ export default function EditProductPage({
     </div>
   );
 }
+

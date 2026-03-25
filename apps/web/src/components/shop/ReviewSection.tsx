@@ -1,29 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 import {
   useReviews,
   useCreateReview,
   useDeleteReview,
 } from "@/hooks/useReviews";
 import { StarRating } from "@/components/ui/StarRating";
+import { useAuthStore } from "@/store/auth.store";
 
 interface Props {
   productId: string;
 }
 
 export function ReviewSection({ productId }: Props) {
-  const { data: session } = useSession();
+  const user = useAuthStore((s) => s.user);
   const { data, isLoading } = useReviews(productId);
   const createReview = useCreateReview(productId);
   const deleteReview = useDeleteReview(productId);
 
   const reviews = data?.data ?? [];
   const meta = data?.meta;
-  const userReviewId = reviews.find(
-    (r) => r.userId === (session?.user as any)?.id,
-  )?.id;
+  const userReviewId = reviews.find((r) => r.userId === user?.id)?.id;
 
   // Form state
   const [rating, setRating] = useState(0);
@@ -51,14 +49,18 @@ export function ReviewSection({ productId }: Props) {
       setTitle("");
       setBody("");
       setShowForm(false);
-    } catch (err: any) {
-      setError(err.message ?? "Failed to submit review");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to submit review");
     }
   }
 
   async function handleDelete(reviewId: string) {
     if (!confirm("Delete your review?")) return;
-    await deleteReview.mutateAsync(reviewId);
+    try {
+      await deleteReview.mutateAsync(reviewId);
+    } catch {
+      /* errors surfaced via API / toasts */
+    }
   }
 
   return (
@@ -109,7 +111,7 @@ export function ReviewSection({ productId }: Props) {
       )}
 
       {/* ── Write review CTA ─────────────────────────────────────────── */}
-      {session && !userReviewId && !showForm && (
+      {!!user && !userReviewId && !showForm && (
         <button
           onClick={() => setShowForm(true)}
           className="w-full border-2 border-dashed border-gray-200 rounded-xl py-4 text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors"
@@ -118,7 +120,7 @@ export function ReviewSection({ productId }: Props) {
         </button>
       )}
 
-      {!session && (
+      {!user && (
         <div className="bg-gray-50 rounded-xl p-4 text-center text-sm text-gray-500">
           <a href="/login" className="text-black font-medium underline">
             Sign in
@@ -218,7 +220,7 @@ export function ReviewSection({ productId }: Props) {
       ) : (
         <div className="space-y-6">
           {reviews.map((review) => {
-            const isOwner = (session?.user as any)?.id === review.userId;
+            const isOwner = user?.id === review.userId;
             return (
               <div
                 key={review.id}

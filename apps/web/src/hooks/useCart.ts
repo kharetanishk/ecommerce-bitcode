@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { api } from "@/lib/api";
+import { useAuthStore } from "@/store/auth.store";
 import { useCartStore } from "@/store/cart.store";
 import type { CartItem } from "@ecommerce/types";
 import { toast } from "@/store/toast.store";
@@ -12,7 +12,7 @@ const cartKeys = {
 
 // Fetch server cart — only when logged in
 export function useServerCart() {
-  const { data: session } = useSession();
+  const token = useAuthStore((s) => s.token);
 
   return useQuery({
     queryKey: cartKeys.all(),
@@ -23,21 +23,21 @@ export function useServerCart() {
           toast.success("Cart fetched successfully");
           return r.data;
         }),
-    enabled: !!session,
+    enabled: !!token,
     staleTime: 30_000,
   });
 }
 
 // Sync server cart into Zustand on login
 export function useCartSync() {
-  const { data: session } = useSession();
+  const token = useAuthStore((s) => s.token);
   const { data: serverCart } = useServerCart();
   const syncFromServer = useCartStore((s) => s.syncFromServer);
   const localItems = useCartStore((s) => s.items);
   const qc = useQueryClient();
 
   useEffect(() => {
-    if (!session || !serverCart) return;
+    if (!token || !serverCart) return;
 
     // Push local items to server that aren't there yet
     const serverProductIds = new Set(
@@ -69,12 +69,12 @@ export function useCartSync() {
         snapshot: i.product,
       })),
     );
-  }, [session, serverCart]);
+  }, [token, serverCart]);
 }
 
 export function useAddToCart() {
   const qc = useQueryClient();
-  const { data: session } = useSession();
+  const token = useAuthStore((s) => s.token);
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
 
@@ -86,13 +86,13 @@ export function useAddToCart() {
       productId: string;
       quantity: number;
     }) => {
-      if (session) {
+      if (token) {
         return api.post("/api/cart/items", { productId, quantity });
       }
       return null; // guest — handled by Zustand only
     },
     onSuccess: (_, { productId: _pid }) => {
-      if (session) qc.invalidateQueries({ queryKey: cartKeys.all() });
+      if (token) qc.invalidateQueries({ queryKey: cartKeys.all() });
       toast.success("Item added to cart successfully");
     },
     onMutate: async ({ productId: _pid }) => {
@@ -103,7 +103,7 @@ export function useAddToCart() {
 
 export function useUpdateCartItem() {
   const qc = useQueryClient();
-  const { data: session } = useSession();
+  const token = useAuthStore((s) => s.token);
 
   return useMutation({
     mutationFn: ({
@@ -113,7 +113,7 @@ export function useUpdateCartItem() {
       productId: string;
       quantity: number;
     }) => {
-      if (session) {
+      if (token) {
         return quantity === 0
           ? api.delete(`/api/cart/items/${productId}`)
           : api.patch(`/api/cart/items/${productId}`, { quantity });
@@ -121,7 +121,7 @@ export function useUpdateCartItem() {
       return Promise.resolve(null);
     },
     onSuccess: () => {
-      if (session) qc.invalidateQueries({ queryKey: cartKeys.all() });
+      if (token) qc.invalidateQueries({ queryKey: cartKeys.all() });
       toast.success("Item updated in cart successfully");
     },
   });
@@ -129,17 +129,17 @@ export function useUpdateCartItem() {
 
 export function useClearCart() {
   const qc = useQueryClient();
-  const { data: session } = useSession();
+  const token = useAuthStore((s) => s.token);
   const clearStore = useCartStore((s) => s.clearCart);
 
   return useMutation({
     mutationFn: () => {
       clearStore();
-      if (session) return api.delete("/api/cart");
+      if (token) return api.delete("/api/cart");
       return Promise.resolve(null);
     },
     onSuccess: () => {
-      if (session) qc.invalidateQueries({ queryKey: cartKeys.all() });
+      if (token) qc.invalidateQueries({ queryKey: cartKeys.all() });
       toast.success("Cart cleared successfully");
     },
   });

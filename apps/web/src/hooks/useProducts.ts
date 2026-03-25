@@ -42,9 +42,9 @@ export function useProduct(slug: string) {
 
 // ─── Admin hooks ──────────────────────────────────────────────────────────────
 
-export function useAdminProducts(filters: ProductFilterInput) {
+export function useAdminProducts(filters: ProductFilterInput = {}) {
   return useQuery({
-    queryKey: productKeys.adminAll(filters),
+    queryKey: ["products", "admin", filters] as const,
     queryFn: () => {
       const params = buildParams(filters);
       return api.get<PaginatedResponse<Product>>(
@@ -140,15 +140,15 @@ export async function uploadImageToR2(
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function buildParams(filters: ProductFilterInput): string {
+function buildParams(filters?: ProductFilterInput): string {
   const params = new URLSearchParams();
-  if (filters.categoryId) params.set("categoryId", filters.categoryId);
-  if (filters.minPrice) params.set("minPrice", String(filters.minPrice));
-  if (filters.maxPrice) params.set("maxPrice", String(filters.maxPrice));
-  if (filters.search) params.set("search", filters.search);
-  if (filters.page) params.set("page", String(filters.page));
-  if (filters.limit) params.set("limit", String(filters.limit));
-  if (filters.sortBy) params.set("sortBy", filters.sortBy);
-  if (filters.attrs?.length) params.set("attrs", JSON.stringify(filters.attrs));
+  if (filters?.categoryId) params.set("categoryId", filters.categoryId);
+  if (filters?.minPrice) params.set("minPrice", String(filters.minPrice));
+  if (filters?.maxPrice) params.set("maxPrice", String(filters.maxPrice));
+  if (filters?.search) params.set("search", filters.search);
+  if (filters?.page) params.set("page", String(filters.page));
+  if (filters?.limit) params.set("limit", String(filters.limit));
+  if (filters?.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters?.attrs?.length) params.set("attrs", JSON.stringify(filters.attrs));
   return params.toString();
 }

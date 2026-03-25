@@ -1,39 +1,23 @@
-import axios, { AxiosError, type AxiosRequestConfig } from "axios";
-import { getSession } from "next-auth/react";
+import axios, { AxiosError } from "axios";
 import type { ApiError } from "@ecommerce/types";
-import { toast } from "@/store/toast.store";
 
-// ─── Axios instance ───────────────────────────────────────────────────────────
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000",
-  withCredentials: true, // sends our httpOnly JWT cookie
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:0311",
+  withCredentials: true,
+  headers: { "Content-Type": "application/json" },
 });
 
-// ─── Request interceptor───────────
-apiClient.interceptors.request.use(async (config) => {
-  // Only runs client-side (getSession is a no-op on server)
-  if (typeof window !== "undefined") {
-    const session = await getSession();
-    if (session?.user?.accessToken) {
-      config.headers.Authorization = `Bearer ${session.user.accessToken}`;
-    }
-  }
-  return config;
-});
-
-// ─── Response interceptor─────────────────────────────────
+// Normalise errors
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiError>) => {
     const message =
       error.response?.data?.error ?? error.message ?? "Something went wrong";
 
-    // Don't toast 401 — those are handled by redirecting to login
-    if (error.response?.status !== 401) {
-      toast.error(message);
+    if (error.response?.status === 401) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("ecommerce-auth");
+      }
     }
 
     return Promise.reject(
@@ -45,35 +29,13 @@ apiClient.interceptors.response.use(
   },
 );
 
-// ─── Typed API helpers ────────────────────────────────────────────────────────
-// Usage: api.get<Product[]>('/api/products')
-// Usage: api.post<Order>('/api/orders', { shippingAddress })
-
 export const api = {
-  get: <T>(url: string, config?: AxiosRequestConfig) =>
-    apiClient.get<T>(url, config).then((r) => r.data),
-
-  post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
-    apiClient.post<T>(url, data, config).then((r) => r.data),
-
-  patch: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
-    apiClient.patch<T>(url, data, config).then((r) => r.data),
-
-  put: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
-    apiClient.put<T>(url, data, config).then((r) => r.data),
-
-  delete: <T>(url: string, config?: AxiosRequestConfig) =>
-    apiClient.delete<T>(url, config).then((r) => r.data),
-};
-
-// ─── Server-side helper (for use in Server Components / Route Handlers) ───────
-// Usage: const products = await serverApi.get<Product[]>('/api/products', token)
-
-export const serverApi = {
-  get: <T>(url: string, token?: string) =>
-    axios
-      .get<T>(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
-      .then((r) => r.data),
+  get: <T>(url: string) => apiClient.get<T>(url).then((r) => r.data),
+  post: <T>(url: string, data?: unknown) =>
+    apiClient.post<T>(url, data).then((r) => r.data),
+  patch: <T>(url: string, data?: unknown) =>
+    apiClient.patch<T>(url, data).then((r) => r.data),
+  put: <T>(url: string, data?: unknown) =>
+    apiClient.put<T>(url, data).then((r) => r.data),
+  delete: <T>(url: string) => apiClient.delete<T>(url).then((r) => r.data),
 };
