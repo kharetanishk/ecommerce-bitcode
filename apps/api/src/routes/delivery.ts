@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import { checkDelivery } from "../services/delivery.service";
+import { log } from "../middleware/logger.middleware";
 
 // Explicit type annotation avoids TS2742 portability errors in enterprise builds
 const router: ReturnType<typeof Router> = Router();
@@ -17,7 +18,7 @@ router.get("/check", async (req: Request, res: Response): Promise<void> => {
     const info = await checkDelivery(pincode, total ? Number(total) : 0);
     res.json({ data: info });
   } catch (err) {
-    console.error("[delivery:check]", err);
+    log.error("delivery:check", "Failed to check delivery", err);
     res.status(500).json({ error: "Failed to check delivery" });
   }
 });

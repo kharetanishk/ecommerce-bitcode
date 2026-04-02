@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import { validate } from "../middleware/validate.middleware";
 import { authenticate, AuthRequest } from "../middleware/auth.middleware";
 import { cartItemSchema, updateCartItemSchema } from "@ecommerce/validators";
+import { log } from "../middleware/logger.middleware";
 
 const router: Router = Router();
 
@@ -37,7 +38,7 @@ router.get(
 
       res.json({ data: { items, total } });
     } catch (err) {
-      console.error("[cart:get]", err);
+      log.error("cart:get", "Failed to fetch cart", err);
       res.status(500).json({ error: "Failed to fetch cart" });
     }
   },
@@ -93,7 +94,7 @@ router.post(
 
       res.status(201).json({ data: item });
     } catch (err) {
-      console.error("[cart:add]", err);
+      log.error("cart:add", "Failed to add cart item", err);
       res.status(500).json({ error: "Failed to add item to cart" });
     }
   },
@@ -133,7 +134,7 @@ router.patch(
 
       res.json({ data: item });
     } catch (err) {
-      console.error("[cart:update]", err);
+      log.error("cart:update", "Failed to update cart item", err);
       res.status(500).json({ error: "Failed to update cart" });
     }
   },
@@ -155,7 +156,7 @@ router.delete(
       });
       res.json({ message: "Item removed" });
     } catch (err) {
-      console.error("[cart:remove]", err);
+      log.error("cart:remove", "Failed to remove cart item", err);
       res.status(500).json({ error: "Failed to remove item" });
     }
   },
@@ -170,7 +171,7 @@ router.delete(
       await prisma.cartItem.deleteMany({ where: { userId: req.user!.id } });
       res.json({ message: "Cart cleared" });
     } catch (err) {
-      console.error("[cart:clear]", err);
+      log.error("cart:clear", "Failed to clear cart", err);
       res.status(500).json({ error: "Failed to clear cart" });
     }
   },

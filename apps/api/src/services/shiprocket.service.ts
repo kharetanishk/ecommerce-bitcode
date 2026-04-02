@@ -1,4 +1,5 @@
 import axios from "axios";
+import { log } from "../middleware/logger.middleware";
 
 const BASE = "https://apiv2.shiprocket.in/v1/external";
 
@@ -83,14 +84,11 @@ export async function createShiprocketOrder(
     process.env.SHIPROCKET_MOCK === "true"
   ) {
     const fakeAwb = `TEST${Date.now()}`;
-    console.log(
-      "\x1b[33m%s\x1b[0m",
-      `[shiprocket:mock] Skipping real API call.`,
-    );
-    console.log("\x1b[33m%s\x1b[0m", `[shiprocket:mock] Fake AWB: ${fakeAwb}`);
-    console.log(
-      "\x1b[33m%s\x1b[0m",
-      `[shiprocket:mock] Set SHIPROCKET_MOCK=false in .env to use real API.`,
+    log.warn("shiprocket", "Mock mode active — skipping real Shiprocket API");
+    log.info("shiprocket", `Fake AWB (dev/mock): ${fakeAwb}`);
+    log.info(
+      "shiprocket",
+      "Set SHIPROCKET_MOCK=false in .env to use the live API",
     );
 
     return {

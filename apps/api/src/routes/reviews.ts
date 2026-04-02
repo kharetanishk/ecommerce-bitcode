@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import { validate } from "../middleware/validate.middleware";
 import { authenticate, AuthRequest } from "../middleware/auth.middleware";
 import { reviewSchema } from "@ecommerce/validators";
+import { log } from "../middleware/logger.middleware";
 
 // Explicit type annotation avoids TS2742 portability errors in enterprise builds
 const router: ReturnType<typeof Router> = Router({ mergeParams: true }); // access :productId from parent
@@ -39,7 +40,7 @@ router.get("/", async (req: Request<{ productId: string }>, res: Response): Prom
 
     res.json({ data: reviews, meta: { total, avgRating, distribution } });
   } catch (err) {
-    console.error("[reviews:list]", err);
+    log.error("reviews:list", "Failed to list reviews", err);
     res.status(500).json({ error: "Failed to fetch reviews" });
   }
 });
@@ -84,7 +85,7 @@ router.post(
 
       res.status(201).json({ data: review });
     } catch (err) {
-      console.error("[reviews:create]", err);
+      log.error("reviews:create", "Failed to create review", err);
       res.status(500).json({ error: "Failed to create review" });
     }
   },
@@ -115,7 +116,7 @@ router.delete(
       await prisma.review.delete({ where: { id: req.params.id } });
       res.json({ message: "Review deleted" });
     } catch (err) {
-      console.error("[reviews:delete]", err);
+      log.error("reviews:delete", "Failed to delete review", err);
       res.status(500).json({ error: "Failed to delete review" });
     }
   },

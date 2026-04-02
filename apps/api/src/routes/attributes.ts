@@ -7,6 +7,7 @@ import {
   AuthRequest,
 } from "../middleware/auth.middleware";
 import { attributeDefinitionSchema } from "@ecommerce/validators";
+import { log } from "../middleware/logger.middleware";
 
 const attributeRouter: Router = Router({ mergeParams: true }); // mergeParams to access :categoryId
 
@@ -23,7 +24,7 @@ attributeRouter.get(
     });
     res.json({ data: attributes });
   } catch (err) {
-    console.error("[attributes:list]", err);
+    log.error("attributes:list", "Failed to list attributes", err);
     res.status(500).json({ error: "Failed to fetch attributes" });
   }
   },
@@ -83,7 +84,7 @@ attributeRouter.post(
           .json({ error: "Attribute name already exists in this category" });
         return;
       }
-      console.error("[attributes:create]", err);
+      log.error("attributes:create", "Failed to create attribute", err);
       res.status(500).json({ error: "Failed to create attribute" });
     }
   },
@@ -125,7 +126,7 @@ attributeRouter.patch(
 
       res.json({ data: attribute });
     } catch (err) {
-      console.error("[attributes:update]", err);
+      log.error("attributes:update", "Failed to update attribute", err);
       res.status(500).json({ error: "Failed to update attribute" });
     }
   },
@@ -155,7 +156,7 @@ attributeRouter.delete(
       await prisma.attributeDefinition.delete({ where: { id } });
       res.json({ message: "Attribute deleted" });
     } catch (err) {
-      console.error("[attributes:delete]", err);
+      log.error("attributes:delete", "Failed to delete attribute", err);
       res.status(500).json({ error: "Failed to delete attribute" });
     }
   },

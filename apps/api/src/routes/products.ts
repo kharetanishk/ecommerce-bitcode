@@ -16,6 +16,7 @@ import {
   productInclude,
 } from "../services/product.service";
 import { deleteFromR2 } from "../lib/r2";
+import { log } from "../middleware/logger.middleware";
 import { z } from "zod";
 
 // Explicit type annotation avoids TS2742 portability errors in enterprise builds
@@ -64,7 +65,7 @@ router.get(
 
       res.json(result);
     } catch (err) {
-      console.error("[products:list]", err);
+      log.error("products:list", "Failed to list products", err);
       res.status(500).json({ error: "Failed to fetch products" });
     }
   },
@@ -85,7 +86,7 @@ router.get("/:slug", async (req: Request, res: Response): Promise<void> => {
 
     res.json({ data: product });
   } catch (err) {
-    console.error("[products:get]", err);
+    log.error("products:get", "Failed to fetch product", err);
     res.status(500).json({ error: "Failed to fetch product" });
   }
 });
@@ -134,7 +135,7 @@ router.get(
 
       res.json(result);
     } catch (err) {
-      console.error("[products:admin-list]", err);
+      log.error("products:admin-list", "Failed to list products (admin)", err);
       res.status(500).json({ error: "Failed to fetch products" });
     }
   },
@@ -159,7 +160,7 @@ router.get(
 
       res.json({ data: product });
     } catch (err) {
-      console.error("[products:admin-get]", err);
+      log.error("products:admin-get", "Failed to fetch product (admin)", err);
       res.status(500).json({ error: "Failed to fetch product" });
     }
   },
@@ -216,7 +217,7 @@ router.post(
 
       res.status(201).json({ data: product });
     } catch (err) {
-      console.error("[products:create]", err);
+      log.error("products:create", "Failed to create product", err);
       res.status(500).json({ error: "Failed to create product" });
     }
   },
@@ -287,7 +288,7 @@ router.patch(
 
       res.json({ data: product });
     } catch (err) {
-      console.error("[products:update]", err);
+      log.error("products:update", "Failed to update product", err);
       res.status(500).json({ error: "Failed to update product" });
     }
   },
@@ -312,7 +313,7 @@ router.patch(
 
       res.json({ data: product });
     } catch (err) {
-      console.error("[products:visibility]", err);
+      log.error("products:visibility", "Failed to update product visibility", err);
       res.status(500).json({ error: "Failed to update visibility" });
     }
   },
@@ -344,7 +345,7 @@ router.delete(
       await prisma.product.delete({ where: { id: req.params.id } });
       res.json({ message: "Product deleted" });
     } catch (err) {
-      console.error("[products:delete]", err);
+      log.error("products:delete", "Failed to delete product", err);
       res.status(500).json({ error: "Failed to delete product" });
     }
   },

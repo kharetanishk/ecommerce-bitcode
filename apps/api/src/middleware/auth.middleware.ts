@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma";
+import { log } from "./logger.middleware";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -24,8 +25,6 @@ export async function authenticate(
       return;
     }
 
-    console.log("TOKEN ->", token);
-
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as unknown as {
       userId: string;
     };
@@ -39,8 +38,6 @@ export async function authenticate(
       },
     });
 
-    console.log("USER ->", user);
-
     if (!user) {
       res.status(401).json({ error: "User not found" });
       return;
@@ -50,7 +47,7 @@ export async function authenticate(
     next();
   } catch (error) {
     res.status(401).json({ error: "Invalid or expired token" });
-    console.log(error);
+    log.error("auth:authenticate", "Invalid or expired token", error);
   }
 }
 

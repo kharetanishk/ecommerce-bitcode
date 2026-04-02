@@ -17,6 +17,7 @@ import {
 } from "../middleware/auth.middleware";
 import { orderSchema } from "@ecommerce/validators";
 import { razorpay, verifyPaymentSignature } from "../lib/razorpay";
+import { log } from "../middleware/logger.middleware";
 import { z } from "zod";
 
 const router: Router = Router();
@@ -49,7 +50,7 @@ router.get(
       });
       res.json({ data: orders });
     } catch (err) {
-      console.error("[orders:my]", err);
+      log.error("orders:my", "Failed to fetch user orders", err);
       res.status(500).json({ error: "Failed to fetch orders" });
     }
   },
@@ -79,7 +80,7 @@ router.get(
 
       res.json({ data: order });
     } catch (err) {
-      console.error("[orders:get]", err);
+      log.error("orders:get", "Failed to fetch order", err);
       res.status(500).json({ error: "Failed to fetch order" });
     }
   },
@@ -215,7 +216,7 @@ router.post(
           });
         } catch (srErr) {
           // Don't fail the order if Shiprocket fails — admin can retry
-          console.error("[shiprocket:push]", srErr);
+          log.error("shiprocket:push", "Shiprocket push failed after order create", srErr);
         }
 
         // Send confirmation email
@@ -240,7 +241,7 @@ router.post(
             deliveryDays: delivery.deliveryDays ?? "5-7 business days",
           });
         } catch (emailErr) {
-          console.error("[email:confirmation]", emailErr);
+          log.error("email:confirmation", "Order confirmation email failed", emailErr);
         }
 
         res.status(201).json({ data: order });
@@ -293,7 +294,7 @@ router.post(
         },
       });
     } catch (err) {
-      console.error("[orders:create]", err);
+      log.error("orders:create", "Failed to create order", err);
       res.status(500).json({ error: "Failed to create order" });
     }
   },
@@ -381,7 +382,9 @@ router.post(
             },
           }),
         )
-        .catch((err) => console.error("[shiprocket:push]", err));
+        .catch((err) =>
+          log.error("shiprocket:push", "Shiprocket push failed after verify", err),
+        );
 
       // Send confirmation email async
       sendOrderConfirmation({
@@ -398,11 +401,13 @@ router.post(
         address: order.shippingAddress as any,
         paymentMethod: "ONLINE",
         deliveryDays: "3-5 business days",
-      }).catch((err) => console.error("[email:confirmation]", err));
+      }).catch((err) =>
+        log.error("email:confirmation", "Order confirmation email failed", err),
+      );
 
       res.json({ data: updated });
     } catch (err) {
-      console.error("[orders:verify]", err);
+      log.error("orders:verify", "Payment verification failed", err);
       res.status(500).json({ error: "Payment verification failed" });
     }
   },
@@ -423,7 +428,7 @@ router.get(
       });
       res.json({ data: orders });
     } catch (err) {
-      console.error("[orders:admin-list]", err);
+      log.error("orders:admin-list", "Failed to fetch orders (admin)", err);
       res.status(500).json({ error: "Failed to fetch orders" });
     }
   },
@@ -458,7 +463,7 @@ router.patch(
 
       res.json({ data: order });
     } catch (err) {
-      console.error("[orders:status]", err);
+      log.error("orders:status", "Failed to update order status", err);
       res.status(500).json({ error: "Failed to update order status" });
     }
   },
@@ -509,11 +514,13 @@ router.post(
         trackingUrl: order.trackingUrl ?? undefined,
         awbCode: order.awbCode ?? undefined,
         courierName: order.courierName ?? undefined,
-      }).catch((err) => console.error("[email:status]", err));
+      }).catch((err) =>
+        log.error("email:status", "Status update email failed", err),
+      );
 
       res.json({ message: "Status updated" });
     } catch (err) {
-      console.error("[webhook:shiprocket]", err);
+      log.error("webhook:shiprocket", "Shiprocket webhook failed", err);
       res.status(500).json({ error: "Webhook failed" });
     }
   },
@@ -568,11 +575,13 @@ router.post(
         name: user?.name ?? "Customer",
         orderId: order.id,
         status: "CANCELLED",
-      }).catch(console.error);
+      }).catch((err) =>
+        log.error("email:status", "Refund notification email failed", err),
+      );
 
       res.json({ message: "Refund initiated successfully" });
     } catch (err) {
-      console.error("[orders:refund]", err);
+      log.error("orders:refund", "Failed to process refund", err);
       res.status(500).json({ error: "Failed to process refund" });
     }
   },

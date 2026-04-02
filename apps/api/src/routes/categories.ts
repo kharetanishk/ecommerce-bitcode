@@ -7,6 +7,7 @@ import {
   AuthRequest,
 } from "../middleware/auth.middleware";
 import { categorySchema } from "@ecommerce/validators";
+import { log } from "../middleware/logger.middleware";
 
 const categoryRouter: Router = Router();
 
@@ -24,7 +25,7 @@ categoryRouter.get("/", async (_req, res: Response): Promise<void> => {
     });
     res.json({ data: categories });
   } catch (err) {
-    console.error("[categories:list]", err);
+    log.error("categories:list", "Failed to list categories", err);
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
@@ -58,7 +59,7 @@ categoryRouter.get("/tree", async (_req, res: Response): Promise<void> => {
 
     res.json({ data: roots });
   } catch (err) {
-    console.error("[categories:tree]", err);
+    log.error("categories:tree", "Failed to load category tree", err);
     res.status(500).json({ error: "Failed to fetch category tree" });
   }
 });
@@ -82,7 +83,7 @@ categoryRouter.get("/:id", async (req, res: Response): Promise<void> => {
 
     res.json({ data: category });
   } catch (err) {
-    console.error("[categories:get]", err);
+    log.error("categories:get", "Failed to fetch category", err);
     res.status(500).json({ error: "Failed to fetch category" });
   }
 });
@@ -112,7 +113,7 @@ categoryRouter.post(
 
       res.status(201).json({ data: category });
     } catch (err) {
-      console.error("[categories:create]", err);
+      log.error("categories:create", "Failed to create category", err);
       res.status(500).json({ error: "Failed to create category" });
     }
   },
@@ -157,7 +158,7 @@ categoryRouter.patch(
 
       res.json({ data: category });
     } catch (err) {
-      console.error("[categories:update]", err);
+      log.error("categories:update", "Failed to update category", err);
       res.status(500).json({ error: "Failed to update category" });
     }
   },
@@ -186,7 +187,7 @@ categoryRouter.delete(
       await prisma.category.delete({ where: { id } });
       res.json({ message: "Category deleted" });
     } catch (err) {
-      console.error("[categories:delete]", err);
+      log.error("categories:delete", "Failed to delete category", err);
       res.status(500).json({ error: "Failed to delete category" });
     }
   },

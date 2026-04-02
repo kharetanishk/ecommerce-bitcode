@@ -5,6 +5,7 @@ import {
   requireAdmin,
   AuthRequest,
 } from "../middleware/auth.middleware";
+import { log } from "../middleware/logger.middleware";
 import { z } from "zod";
 
 const router: Router = Router();
@@ -32,7 +33,7 @@ router.get(
 
       res.json({ data: products });
     } catch (err) {
-      console.error("[inventory:list]", err);
+      log.error("inventory:list", "Failed to list inventory", err);
       res.status(500).json({ error: "Failed to fetch inventory" });
     }
   },
@@ -59,7 +60,7 @@ router.patch(
 
       res.json({ data: product });
     } catch (err) {
-      console.error("[inventory:update]", err);
+      log.error("inventory:update", "Failed to update inventory", err);
       res.status(500).json({ error: "Failed to update stock" });
     }
   },

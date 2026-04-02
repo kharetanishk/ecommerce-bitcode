@@ -5,6 +5,7 @@ import {
   AuthRequest,
 } from "../middleware/auth.middleware";
 import { generateUploadUrl } from "../lib/r2";
+import { log } from "../middleware/logger.middleware";
 import { z } from "zod";
 
 // Explicit type annotation avoids TS2742 portability errors in enterprise builds
@@ -37,7 +38,7 @@ router.post(
 
       res.json({ uploadUrl, key, publicUrl });
     } catch (err: any) {
-      console.error("[upload:presign]", err);
+      log.error("upload:presign", "Failed to generate presigned upload URL", err);
       res
         .status(400)
         .json({ error: err.message ?? "Failed to generate upload URL" });

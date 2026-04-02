@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import { setTokenCookie, signtoken } from "../utils/token";
 import { AuthRequest } from "../middleware/auth.middleware";
+import { log } from "../middleware/logger.middleware";
 
 //register user controller
 async function register(req: Request, res: Response): Promise<void> {
@@ -27,13 +28,13 @@ async function register(req: Request, res: Response): Promise<void> {
     const token = signtoken(user.id);
     setTokenCookie(res, token);
 
-    console.log("User registered successfully", user);
+    log.success("auth:register", "User registered successfully", user);
     res.status(201).json({
       user,
       message: "User registered successfully",
     });
   } catch (error) {
-    console.error("[register]", error);
+    log.error("auth:register", "Failed to register user", error);
     res.status(500).json({ error: "Failed to register user" });
   }
 }
@@ -44,6 +45,7 @@ export { register };
 async function loginUser(req: Request, res: Response): Promise<void> {
   try {
     const { email, password } = req.body;
+    log.info("auth:login", `Attempting login for: ${email}`);
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user?.password) {
@@ -60,7 +62,7 @@ async function loginUser(req: Request, res: Response): Promise<void> {
     const token = signtoken(user.id);
     setTokenCookie(res, token);
 
-    console.log("User logged in successfully", user);
+    log.success("auth:login", `Login successful for: ${user.email}`);
 
     res.json({
       user: {
@@ -72,7 +74,7 @@ async function loginUser(req: Request, res: Response): Promise<void> {
       token,
     });
   } catch (err) {
-    console.error("[login]", err);
+    log.error("auth:login", "Login failed", err);
     res.status(500).json({ error: "Login failed" });
   }
 }
@@ -143,7 +145,7 @@ async function oauthUser(req: Request, res: Response): Promise<void> {
     // We just return our JWT so NextAuth can store it in its session
     res.json({ user, token });
   } catch (err) {
-    console.error("[oauth]", err);
+    log.error("auth:oauth", "OAuth sign-in failed", err);
     res.status(500).json({ error: "OAuth sign-in failed" });
   }
 }

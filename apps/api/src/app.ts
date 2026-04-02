@@ -3,6 +3,7 @@ dotenv.config();
 import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { requestLogger, log } from "./middleware/logger.middleware";
 import authRouter from "./routes/auth";
 import categoryRouter from "./routes/categories";
 import attributeRouter from "./routes/attributes";
@@ -28,6 +29,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(requestLogger);
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use("/api/auth", authRouter);
@@ -55,12 +57,12 @@ app.get("/api/health", (_req, res) => {
 
 // ─── Global error handler ─────────────────────────────────────────────────────
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error("[unhandled error]", err.stack);
+  log.error("api:unhandled", err.message || "Unhandled error", err);
   res.status(500).json({ error: "Something went wrong" });
 });
 
 app.listen(PORT, () => {
-  console.log(`API running at http://localhost:${PORT}`);
+  log.success("api", `API running at http://localhost:${PORT}`);
 });
 
 export default app;

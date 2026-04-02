@@ -5,6 +5,7 @@ import {
   requireAdmin,
   AuthRequest,
 } from "../middleware/auth.middleware";
+import { log } from "../middleware/logger.middleware";
 import { z } from "zod";
 
 // Explicit type annotation avoids TS2742 portability errors in enterprise builds
@@ -75,7 +76,7 @@ router.post(
 
       res.status(201).json({ data: returnReq });
     } catch (err) {
-      console.error("[returns:create]", err);
+      log.error("returns:create", "Failed to create return request", err);
       res.status(500).json({ error: "Failed to create return request" });
     }
   },
@@ -97,7 +98,7 @@ router.get(
       });
       res.json({ data: returns });
     } catch (err) {
-      console.error("[returns:list]", err);
+      log.error("returns:list", "Failed to list returns", err);
       res.status(500).json({ error: "Failed to fetch returns" });
     }
   },
@@ -123,7 +124,7 @@ router.patch(
 
       res.json({ data: updated });
     } catch (err) {
-      console.error("[returns:update]", err);
+      log.error("returns:update", "Failed to update return", err);
       res.status(500).json({ error: "Failed to update return request" });
     }
   },
