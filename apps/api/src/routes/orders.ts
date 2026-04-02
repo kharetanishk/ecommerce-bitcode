@@ -18,6 +18,7 @@ import {
 import { orderSchema } from "@ecommerce/validators";
 import { razorpay, verifyPaymentSignature } from "../lib/razorpay";
 import { log } from "../middleware/logger.middleware";
+import { forShiprocket } from "../lib/date";
 import { z } from "zod";
 
 const router: Router = Router();
@@ -181,7 +182,7 @@ router.post(
 
           const srResult = await createShiprocketOrder({
             orderId: order.id,
-            orderDate: new Date().toISOString().slice(0, 16).replace("T", " "),
+            orderDate: forShiprocket(),
             customerName: user?.name ?? "Customer",
             customerEmail: user?.email ?? "",
             customerPhone: (shippingAddress as any).phone,
@@ -348,7 +349,7 @@ router.post(
       // Push to Shiprocket async
       createShiprocketOrder({
         orderId: order.id,
-        orderDate: new Date().toISOString().slice(0, 16).replace("T", " "),
+        orderDate: forShiprocket(),
         customerName: (order.user as any)?.name ?? "Customer",
         customerEmail: (order.user as any)?.email ?? "",
         customerPhone: (order.shippingAddress as any).phone,

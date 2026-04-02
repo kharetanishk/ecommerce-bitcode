@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
+import { formatISTShort } from "@/lib/date";
 import Link from "next/link";
 import type { Order } from "@ecommerce/types";
 
@@ -61,11 +62,7 @@ export default function OrdersPage() {
                       #{order.id.slice(0, 8).toUpperCase()}
                     </p>
                     <p className="text-xs text-gray-400">
-                      {new Date(order.createdAt).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {formatISTShort(order.createdAt)}
                     </p>
                     <p className="text-sm text-gray-500">
                       {order.items.length} item

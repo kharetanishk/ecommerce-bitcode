@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { forLogger, forLoggerFull } from "../lib/date";
 
 // Full palette (spec): BLACK \x1b[30m, BG_RED \x1b[41m, BG_GREEN \x1b[42m,
 // BG_YELLOW \x1b[43m, BG_BLUE \x1b[44m — available if you extend styling.
@@ -25,17 +26,8 @@ function isDevelopment(): boolean {
   return process.env.NODE_ENV === "development";
 }
 
-function getTime(): string {
-  const d = new Date();
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
-}
-
-function getDateTime(): string {
-  const d = new Date();
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
-}
+// Use forLogger() for inline timestamps
+// Use forLoggerFull() for request/response headers
 
 function methodColor(method: string): string {
   const m = method.toUpperCase();
@@ -135,7 +127,7 @@ function logIncomingRequest(req: Request): void {
   console.log(line(`${BOLD}${BLUE}[API]${RESET} ${CYAN}──►${RESET} ${BOLD}INCOMING REQUEST${RESET}`));
   console.log(line(`${DIM}Method:${RESET}   ${mc}${BOLD}${m}${RESET}`));
   console.log(line(`${DIM}URL:${RESET}      ${WHITE}${req.originalUrl || req.url}${RESET}`));
-  console.log(line(`${DIM}Time:${RESET}     ${getDateTime()}`));
+  console.log(line(`${DIM}Time:${RESET}     ${forLoggerFull()}`));
   console.log(line(`${DIM}IP:${RESET}       ${req.ip ?? req.socket.remoteAddress ?? "unknown"}`));
 
   if (!isEmptyBody(req.body)) {
@@ -226,7 +218,7 @@ export const log = {
   info(label: string, message: string, data?: unknown): void {
     if (!isDevelopment()) return;
     safeManualLog(() => {
-      const t = getTime();
+      const t = forLogger();
       console.log(`${BLUE}[API]${RESET} ${CYAN}ℹ${RESET} ${DIM}[${label}]${RESET} ${DIM}${t}${RESET} ${message}`);
       if (data !== undefined) {
         console.log(`${DIM}  data:${RESET} ${WHITE}${formatJsonBlock(data)}${RESET}`);
@@ -237,7 +229,7 @@ export const log = {
   success(label: string, message: string, data?: unknown): void {
     if (!isDevelopment()) return;
     safeManualLog(() => {
-      const t = getTime();
+      const t = forLogger();
       console.log(
         `${BLUE}[API]${RESET} ${GREEN}✓${RESET} ${DIM}[${label}]${RESET} ${DIM}${t}${RESET} ${GREEN}${message}${RESET}`,
       );
@@ -250,7 +242,7 @@ export const log = {
   warn(label: string, message: string, data?: unknown): void {
     if (!isDevelopment()) return;
     safeManualLog(() => {
-      const t = getTime();
+      const t = forLogger();
       console.log(
         `${BLUE}[API]${RESET} ${YELLOW}⚠${RESET} ${DIM}[${label}]${RESET} ${DIM}${t}${RESET} ${YELLOW}${message}${RESET}`,
       );
@@ -263,7 +255,7 @@ export const log = {
   error(label: string, message: string, err?: unknown): void {
     if (isDevelopment()) {
       safeManualLog(() => {
-        const t = getTime();
+        const t = forLogger();
         const { message: em, stack } = formatErr(err);
         console.log(
           `${BLUE}[API]${RESET} ${RED}✗${RESET} ${DIM}[${label}]${RESET} ${DIM}${t}${RESET} ${RED}${message}${RESET}`,
@@ -285,7 +277,7 @@ export const log = {
   db(label: string, message: string, data?: unknown): void {
     if (!isDevelopment()) return;
     safeManualLog(() => {
-      const t = getTime();
+      const t = forLogger();
       console.log(
         `${BLUE}[API]${RESET} ${MAGENTA}⬡ [DB]${RESET} ${DIM}[${label}]${RESET} ${DIM}${t}${RESET} ${message}`,
       );

@@ -6,6 +6,7 @@ import {
   AuthRequest,
 } from "../middleware/auth.middleware";
 import { log } from "../middleware/logger.middleware";
+import { isWithinReturnWindow } from "../lib/date";
 import { z } from "zod";
 
 // Explicit type annotation avoids TS2742 portability errors in enterprise builds
@@ -49,10 +50,7 @@ router.post(
       }
 
       // Check return window (7 days)
-      const deliveredAt = new Date(order.updatedAt);
-      const daysSince =
-        (Date.now() - deliveredAt.getTime()) / (1000 * 60 * 60 * 24);
-      if (daysSince > 7) {
+      if (!isWithinReturnWindow(order.updatedAt, 7)) {
         res.status(400).json({
           error: "Return window has expired (7 days from delivery)",
         });

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
+import { formatISTShort } from "@/lib/date";
 import { toast } from "@/store/toast.store";
 import type { Order, OrderStatus } from "@ecommerce/types";
 
@@ -150,11 +151,7 @@ export default function AdminOrdersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-gray-400 text-xs">
-                      {new Date(order.createdAt).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {formatISTShort(order.createdAt)}
                     </td>
                     <td className="px-6 py-4">
                       <svg

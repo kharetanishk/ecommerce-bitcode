@@ -8,6 +8,7 @@ import {
 } from "@/hooks/useReviews";
 import { StarRating } from "@/components/ui/StarRating";
 import { useAuthStore } from "@/store/auth.store";
+import { formatRelative } from "@/lib/date";
 
 interface Props {
   productId: string;
@@ -249,14 +250,7 @@ export function ReviewSection({ productId }: Props) {
                         {(review.user as any)?.name ?? "Anonymous"}
                       </p>
                       <p className="text-xs text-gray-400">
-                        {new Date(review.createdAt).toLocaleDateString(
-                          "en-IN",
-                          {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          },
-                        )}
+                        {formatRelative(review.createdAt)}
                       </p>
                     </div>
                   </div>

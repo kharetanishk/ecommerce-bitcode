@@ -4,6 +4,7 @@ import { use }                    from 'react'
 import { useQuery }               from '@tanstack/react-query'
 import { api }                    from '@/lib/api'
 import { formatPrice }            from '@/lib/utils'
+import { formatISTDate }          from '@/lib/date'
 import Link                       from 'next/link'
 import { ReturnRequestSection }   from '@/components/shop/ReturnRequestSection'
 import type { Order }             from '@ecommerce/types'
@@ -96,9 +97,7 @@ export default function OrderDetailPage({
                 Order #{order.id.slice(0, 8).toUpperCase()}
               </h2>
               <p className="text-sm text-gray-400 mt-0.5">
-                {new Date(order.createdAt).toLocaleDateString('en-IN', {
-                  day: 'numeric', month: 'long', year: 'numeric',
-                })}
+                {formatISTDate(order.createdAt)}
               </p>
               {/* Payment method badge */}
               {orderAny.paymentMethod && (
